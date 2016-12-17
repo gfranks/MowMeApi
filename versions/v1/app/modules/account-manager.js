@@ -8,39 +8,39 @@ var moment 		= require('moment');
 	ESTABLISH DATABASE CONNECTION
 */
 
-var dbName = process.env.DB_NAME || 'node-login';
-var dbHost = process.env.DB_HOST || 'localhost'
-var dbPort = process.env.DB_PORT || 27017;
+var dbName = process.env.DB_NAME;
+var dbHost = process.env.DB_HOST;
+var dbPort = process.env.DB_PORT;
 
-var db = new MongoDB(dbName, new Server(dbHost, dbPort, {auto_reconnect: true}), {w: 1});
-db.open(function(e, d){
-	if (e) {
-		console.log(e);
-	} else {
-		if (process.env.NODE_ENV == 'live') {
-			db.authenticate(process.env.DB_USER, process.env.DB_PASS, function(e, res) {
-				if (e) {
-					console.log('mongo :: error: not authenticated', e);
-				}
-				else {
-					console.log('mongo :: authenticated and connected to database :: "'+dbName+'"');
-				}
-			});
-		}	else{
-			console.log('mongo :: connected to database :: "'+dbName+'"');
-		}
-	}
-});
+// var db = new MongoDB(dbName, new Server(dbHost, dbPort, {auto_reconnect: true}), {w: 1});
+// db.open(function(e, d){
+// 	if (e) {
+// 		console.log(e);
+// 	} else {
+// 		if (process.env.ENV == 'PROD') {
+// 			db.authenticate(process.env.DB_USER, process.env.DB_PASS, function(e, res) {
+// 				if (e) {
+// 					console.log('mongo :: error: not authenticated', e);
+// 				}
+// 				else {
+// 					console.log('mongo :: authenticated and connected to database :: "'+dbName+'"');
+// 				}
+// 			});
+// 		} else {
+// 			console.log('mongo :: connected to database :: "'+dbName+'"');
+// 		}
+// 	}
+// });
 
-var accounts = db.collection('accounts');
+// var accounts = db.collection('accounts');
 
 /* login validation methods */
 
 exports.autoLogin = function(email, pass, callback) {
 	accounts.findOne({user:email}, function(e, o) {
-		if (o){
+		if (o) {
 			o.pass == pass ? callback(o) : callback(null);
-		}	else{
+		} else {
 			callback(null);
 		}
 	});
@@ -48,9 +48,9 @@ exports.autoLogin = function(email, pass, callback) {
 
 exports.manualLogin = function(email, pass, callback) {
 	accounts.findOne({user:email}, function(e, o) {
-		if (o == null){
+		if (o == null) {
 			callback('email-not-found');
-		}	else{
+		} else {
 			validatePassword(pass, o.pass, function(err, res) {
 				if (res){
 					callback(null, o);
@@ -66,14 +66,14 @@ exports.manualLogin = function(email, pass, callback) {
 
 exports.addNewAccount = function(newData, callback) {
 	accounts.findOne({user:newData.email}, function(e, o) {
-		if (o){
+		if (o) {
 			callback('email-taken');
-		}	else{
+		} else {
 			accounts.findOne({email:newData.email}, function(e, o) {
 				if (o){
 					callback('email-taken');
 				}	else{
-					saltAndHash(newData.pass, function(hash){
+					saltAndHash(newData.pass, function(hash) {
 						newData.pass = hash;
 						// append date stamp when record was created //
 						newData.date = moment().format('MMMM Do YYYY, h:mm:ss a');
@@ -86,15 +86,15 @@ exports.addNewAccount = function(newData, callback) {
 }
 
 exports.updateAccount = function(newData, callback) {
-	accounts.findOne({_id:getObjectId(newData.id)}, function(e, o){
+	accounts.findOne({_id:getObjectId(newData.id)}, function(e, o) {
 		o.email 	= newData.email;
-		if (newData.pass == ''){
+		if (newData.pass == '') {
 			accounts.save(o, {safe: true}, function(e) {
 				if (e) callback(e);
 				else callback(null, o);
 			});
-		}	else{
-			saltAndHash(newData.pass, function(hash){
+		} else {
+			saltAndHash(newData.pass, function(hash) {
 				o.pass = hash;
 				accounts.save(o, {safe: true}, function(e) {
 					if (e) callback(e);
@@ -106,11 +106,11 @@ exports.updateAccount = function(newData, callback) {
 }
 
 exports.updatePassword = function(email, newPass, callback) {
-	accounts.findOne({email:email}, function(e, o){
-		if (e){
+	accounts.findOne({email:email}, function(e, o) {
+		if (e) {
 			callback(e, null);
-		}	else{
-			saltAndHash(newPass, function(hash){
+		} else {
+			saltAndHash(newPass, function(hash) {
 		        o.pass = hash;
 		        accounts.save(o, {safe: true}, callback);
 			});
@@ -124,12 +124,22 @@ exports.deleteAccount = function(id, callback) {
 	accounts.remove({_id: getObjectId(id)}, callback);
 }
 
+exports.getAccountById = function(id, callback) {
+	accounts.findOne({_id:getObjectId(id)}, function(e, o) { 
+		if (e) {
+			callback(e, null);
+		} else {
+			callback(null, o);
+		}
+	});
+}
+
 exports.getAccountByEmail = function(email, callback) {
-	accounts.findOne({email:email}, function(e, o){ callback(o); });
+	accounts.findOne({email:email}, function(e, o) { callback(o); });
 }
 
 exports.validateResetLink = function(email, passHash, callback) {
-	accounts.find({ $and: [{email:email, pass:passHash}] }, function(e, o){
+	accounts.find({ $and: [{email:email, pass:passHash}] }, function(e, o) {
 		callback(o ? 'ok' : null);
 	});
 }
