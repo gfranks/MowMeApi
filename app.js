@@ -1,48 +1,24 @@
-
-/**
-	* Node.js Login Boilerplate
-	* More Info : http://kitchen.braitsch.io/building-a-login-system-in-node-js-and-mongodb/
-	* Copyright (c) 2013-2016 Stephen Braitsch
-**/
-
 var http = require('http');
 var express = require('express');
-var session = require('express-session');
-var bodyParser = require('body-parser');
-var errorHandler = require('errorhandler');
-var cookieParser = require('cookie-parser');
-var MongoStore = require('connect-mongo')(session);
+var app = module.exports = express();
+var router = express.Router()
 
-var app = express();
-
-app.locals.pretty = true;
 app.set('port', process.env.PORT || 3000);
-app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({ extended: true }));
 
-// build mongo database connection url //
+// define the versions
+var VERSIONS = {'Version 1': '/v1'};
 
-var dbHost = process.env.DB_HOST || 'localhost'
-var dbPort = process.env.DB_PORT || 27017;
-var dbName = process.env.DB_NAME || 'node-login';
+// route to display versions
+app.get('/', function(req, res) {
+    res.json(VERSIONS);
+});
 
-var dbURL = 'mongodb://'+dbHost+':'+dbPort+'/'+dbName;
-if (app.get('env') == 'live'){
-// prepend url with authentication credentials // 
-	dbURL = 'mongodb://'+process.env.DB_USER+':'+process.env.DB_PASS+'@'+dbHost+':'+dbPort+'/'+dbName;
+// versioned routes go in the routes/ directory
+// import the versions
+for (var v in VERSIONS) {
+    app.use(VERSIONS[v], require('./versions' + VERSIONS[v] + VERSIONS[v])(app, router));
 }
 
-app.use(session({
-	secret: 'faeb4453e5d14fe6f6d04637f78077c76c73d1b4',
-	proxy: true,
-	resave: true,
-	saveUninitialized: true,
-	store: new MongoStore({ url: dbURL })
-	})
-);
-
-require('./app/routes')(app);
-
-http.createServer(app).listen(app.get('port'), function(){
+http.createServer(app).listen(app.get('port'), function() {
 	console.log('Express server listening on port ' + app.get('port'));
 });

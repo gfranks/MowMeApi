@@ -17,7 +17,8 @@
     "errorhandler": "1.4.2",
     "express": "4.13.3",
     "express-session": "1.11.3",
-    "moment": "2.10.3",
+    "mongoose": "4.7.3",
+    "mongoose-double": "0.0.1",
     "mongodb": "2.0.45"
   },
   "engines": {
