@@ -1,7 +1,7 @@
 {
   "name": "mow-me",
   "version": "1.0.0",
-  "description": "MowMe API built with Node.js & MongoDb",
+  "description": "MowMe API built with Node.js, Express, Mongoose, & MongoDb",
   "author": "Garrett Franks <lgfz71@gmail.com>",
   "website": {
     "url": "https://mow-me.herokuapp.com/"
@@ -14,17 +14,16 @@
     "body-parser": "1.14.1",
     "connect-mongo": "0.8.2",
     "emailjs": "^1.0.4",
-    "errorhandler": "1.4.2",
     "express": "4.13.3",
-    "express-session": "1.11.3",
+    "uuid": "3.0.1",
     "mongoose": "4.7.3",
     "mongoose-double": "0.0.1",
     "mongodb": "2.0.45"
   },
   "engines": {
-    "node": "4.2.1"
+    "node": "4.2.6"
   },
   "scripts": {
-    "start": "node app.js"
+    "start": "node --harmony_proxies app.js"
   }
 }
