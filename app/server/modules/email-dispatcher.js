@@ -8,23 +8,27 @@ EM.server = require("emailjs/email").server.connect({
 	ssl		    : true
 });
 
-EM.dispatchResetPasswordLink = function(account, callback) {
+EM.dispatchResetPasswordLink = function(user, callback) {
 	EM.server.send({
-		from         : process.env.EMAIL_FROM || 'Node Login <do-not-reply@gmail.com>',
-		to           : account.email,
+		from         : process.env.EMAIL_FROM || 'Mow Me Login <do-not-reply@gmail.com>',
+		to           : user.email,
 		subject      : 'Password Reset',
 		text         : 'something went wrong... :(',
-		attachment   : EM.composeEmail(account)
+		attachment   : EM.composeEmail(user)
 	}, callback );
 }
 
-EM.composeEmail = function(o) {
-	var link = 'https://mow-me.herokuapp.com/reset-password?e='+o.email+'&p='+o.pass;
+EM.composeEmail = function(user) {
+	var link = 'https://mow-me.herokuapp.com/reset-password?email='+email.email+'&password='+user.password;
 	var html = "<html><body>";
-		html += "Hi "+o.name+",<br><br>";
-		html += "Your username is <b>"+o.user+"</b><br><br>";
-		html += "<a href='"+link+"'>Click here to reset your password</a><br><br>";
-		html += "Cheers,<br>";
-		html += "</body></html>";
+	if (user.firstName) {
+		html += "Hi "+user.firstName+",<br><br>";	
+	} else {
+		html += "Hi "+user.email+",<br><br>";
+	}
+	html += "Your email is <b>"+user.email+"</b><br><br>";
+	html += "<a href='"+link+"'>Click here to reset your password</a><br><br>";
+	html += "Cheers,<br>";
+	html += "</body></html>";
 	return  [{data:html, alternative:true}];
 }

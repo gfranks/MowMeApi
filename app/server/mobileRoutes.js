@@ -1,20 +1,21 @@
-const uuidV4 = require('uuid/v4');
-var UM = require('./modules/user-manager');
-var EM = require('./modules/email-dispatcher');
-var SM = require('./modules/service-manager');
-var FM = require('./modules/favorite-manager');
-Session = require("./models/session.js");
-Error = require("./models/error.js");
-var sessionHeader = 'x-session-id';
+const uuidV4 = require('uuid/v4')
+var UM = require('./modules/user-manager')
+  , EM = require('./modules/email-dispatcher')
+  , SM = require('./modules/service-manager')
+  , FM = require('./modules/favorite-manager')
+  , sessionHeader = 'x-session-id'
 
-module.exports = function(app) {
+Session = require("./models/session.js")
+Error = require("./models/error.js")
+
+module.exports = function(router) {
 
 	/**
      * *******
      * SESSION
      * *******
      */
-     app.get('/session', function(req, res) {
+     router.get('/session', function(req, res) {
 		var session = new Session();
 		session.token = uuidV4();
 		res.status(200).send(session);
@@ -25,7 +26,7 @@ module.exports = function(app) {
      * LOGIN
      * *****
      */
-	app.post('/login', function(req, res) {
+	router.post('/login', function(req, res) {
 		UM.login(req.body['email'], req.body['password'], function(err, user) {
 			if (err) {
 				res.status(404).send(Error.makeError(err));
@@ -36,7 +37,7 @@ module.exports = function(app) {
 		});
 	});
 
-	app.post('/logout', function(req, res) {
+	router.post('/logout', function(req, res) {
 		var session = new Session();
 		session.token = uuidV4();
 		res.status(200).send(session);
@@ -47,7 +48,7 @@ module.exports = function(app) {
      * SIGN-UP
      * *******
      */
-	app.post('/signup', function(req, res) {
+	router.post('/signup', function(req, res) {
 		var sessionId = req.headers[sessionHeader];
 		UM.createUser(sessionId, req.body, function(err, user) {
 			if (err) {
@@ -65,7 +66,7 @@ module.exports = function(app) {
      * PASSWORD RESET
      * **************
      */
-	app.post('/lost-password', function(req, res) {
+	router.post('/lost-password', function(req, res) {
 		// look up the user's account via their email //
 		UM.getUserById(req.body['userId'], function(err1, user) {
 			if (err1) {
@@ -87,7 +88,7 @@ module.exports = function(app) {
 		});
 	});
 
-	app.get('/reset-password', function(req, res) {
+	router.get('/reset-password', function(req, res) {
 		var email = req.query["email"];
 		var passH = req.query["password"];
 		UM.validateResetLink(email, passH, function(err) {
@@ -99,7 +100,7 @@ module.exports = function(app) {
 		})
 	});
 	
-	app.post('/reset-password', function(req, res) {
+	router.post('/reset-password', function(req, res) {
 		var nPass = req.body['password'];
 		var userId = req.cookie.userId;
 		UM.updatePassword(userId, nPass, function(err, user) {
@@ -117,7 +118,7 @@ module.exports = function(app) {
      * USERS
      * *****
      */
-	app.get('/users/:userId', function(req, res) {
+	router.get('/users/:userId', function(req, res) {
 		UM.getUserById(req.params.userId, function(err, user) {
 			if (err) {
 				res.status(404).send(Error.makeError(err));
@@ -127,7 +128,7 @@ module.exports = function(app) {
 		})
 	});
 
-	app.post('/users/:userId', function(req, res) {
+	router.post('/users/:userId', function(req, res) {
 		UM.updateUser(req.params.userId, req.body, function(err, user) {
 			if (err) {
 				res.status(404).send(Error.makeError(err));
@@ -137,7 +138,7 @@ module.exports = function(app) {
 		});
 	});
 	
-	app.delete('/users/:userId', function(req, res) {
+	router.delete('/users/:userId', function(req, res) {
 		UM.deleteUser(req.params.userId, function(err, obj) { 
 			if (err) {
 				var session = new Session();
@@ -154,7 +155,7 @@ module.exports = function(app) {
      * SERVICES
      * ********
      */
-    app.get('/services', function(req, res) {
+    router.get('/services', function(req, res) {
      	var location = req.body.location;
      	var filters = req.body.filters;
 
@@ -168,7 +169,7 @@ module.exports = function(app) {
 		});
      });
 
-    app.get('/services/:serviceId', function(req, res) {
+    router.get('/services/:serviceId', function(req, res) {
      	var serviceId = req.params.serviceId;
 
 		// TODO
@@ -186,7 +187,7 @@ module.exports = function(app) {
      * FAVORITES
      * *********
      */
-     app.get('/favorites', function(req, res) {
+     router.get('/favorites', function(req, res) {
      	var sessionId = req.headers[sessionHeader];
 		FM.getFavorites(sessionId, function(err, favorites) {
 			if (err) {
@@ -197,7 +198,7 @@ module.exports = function(app) {
 		});
 	});
 
-    app.get('/users/:userId/favorites', function(req, res) {
+    router.get('/users/:userId/favorites', function(req, res) {
      	var userId = req.params.userId;
 		FM.getFavorites(userId, function(err, favorites) {
 			if (err) {
@@ -208,7 +209,7 @@ module.exports = function(app) {
 		});
 	});
 
-	app.post('/favorites/:serviceId', function(req, res) {
+	router.post('/favorites/:serviceId', function(req, res) {
 		var sessionId = req.headers[sessionHeader];
      	var serviceId = req.params.serviceId;
 		FM.favoriteService(sessionId, serviceId, function(err, favorite) {
@@ -220,7 +221,7 @@ module.exports = function(app) {
 		});
 	});
 
-	app.post('/users/:userId/favorites/:serviceId', function(req, res) {
+	router.post('/users/:userId/favorites/:serviceId', function(req, res) {
      	var userId = req.params.userId;
      	var serviceId = req.params.serviceId;
 		FM.favoriteService(userId, serviceId, function(err, favorite) {
@@ -232,7 +233,7 @@ module.exports = function(app) {
 		});
 	});
 
-	app.delete('/favorites/:serviceId', function(req, res) {
+	router.delete('/favorites/:serviceId', function(req, res) {
 		var sessionId = req.headers[sessionHeader];
 		var serviceId = req.params.serviceId;
 		FM.unfavoriteService(sessionId, serviceId, function(err, favorite) {
@@ -244,7 +245,7 @@ module.exports = function(app) {
 		});
 	});
 
-	app.delete('/users/:userId/favorites/:serviceId', function(req, res) {
+	router.delete('/users/:userId/favorites/:serviceId', function(req, res) {
 		var userId = req.params.userId;
 		var serviceId = req.params.serviceId;
 		FM.unfavoriteService(userId, serviceId, function(err, favorite) {
@@ -261,7 +262,9 @@ module.exports = function(app) {
      * ERROR HANDLING
      * **************
      */
-	app.get('*', function(req, res) { 
+	router.get('*', function(req, res) { 
 		res.status(404).send(Error.makeError('Unauthorized'));
 	});
+
+	return router;
 };
