@@ -11,19 +11,28 @@
     "url": "git@github.com:gfranks/MowMeApi.git"
   },
   "dependencies": {
-    "body-parser": "1.14.1",
-    "connect-mongo": "0.8.2",
-    "emailjs": "^1.0.4",
-    "express": "4.13.3",
-    "uuid": "3.0.1",
-    "mongoose": "4.7.3",
-    "mongoose-double": "0.0.1",
-    "mongodb": "2.0.45"
+    "body-parser": "^1.15.2",
+    "emailjs": "^1.0.8",
+    "express": "^4.14.0",
+    "jade": "^1.11.0",
+    "mongoose": "^4.7.4",
+    "mongoose-double": "^0.0.1",
+    "mongodb": "^2.2.16",
+    "morgan": "^1.7.0",
+    "nib": "^1.1.2",
+    "nodemon": "^1.11.0",
+    "stylus": "^0.54.5",
+    "uuid": "^3.0.1"
   },
   "engines": {
-    "node": "4.2.6"
+    "node": "7.3.0"
   },
   "scripts": {
-    "start": "node --harmony_proxies app.js"
+    "build-css": "stylus app/public/stylesheets/index.styl -o static/css",
+    "watch-css": "stylus app/public/stylesheets/index.styl -o static/css -w",
+    "clean": "rm -rf static/css && mkdir -p static/css",
+    "build": "npm run clean && npm run build-css",
+    "watch": "npm run clean && npm run watch-css & nodemon server -e js,jade",
+    "start": "node app.js"
   }
 }

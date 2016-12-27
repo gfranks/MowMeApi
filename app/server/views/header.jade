@@ -1,0 +1,23 @@
+doctype html
+html
+  head
+    link(rel='stylesheet', href='/css/index.css')
+    title Mow Me
+  body
+
+    block scripts
+
+    .header
+      h1.page-title Mow Me
+
+    ul.nav
+      li: a(href='/') Discover
+      li: a(href='#favorites') Favorites
+      li: a(href='#recent') Recent
+      li: a(href='#profile') Profile
+    
+    .main-content
+      block content
+
+    .footer
+      p Copyright © 2016 Garrett Franks

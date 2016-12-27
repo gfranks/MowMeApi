@@ -1,5 +1,5 @@
-Service = require("../models/service.js");
-FavoriteService = require("../models/favorite-service.js");
+Service = require("../models/service.js")
+FavoriteService = require("../models/favorite-service.js")
 var FM = {};
 module.exports = FM;
 

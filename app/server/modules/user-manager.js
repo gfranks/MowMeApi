@@ -60,22 +60,6 @@ UM.updatePassword = function(userId, newPass, callback) {
 			}
 		});
 	});
-	// User.findOne({id: userId}, function(e, user) {
-	// 	if (e) {
-	// 		callback('User does not exist', null);
-	// 	} else {
-	// 		saltAndHash(newPass, function(hash) {
-	// 	        user.password = hash;
-	// 	        user.save(function(err) {
-	// 				if (err) {
-	// 					callback('Unable to update user password', null);
-	// 				} else {
-	// 					callback(null, user);
-	// 				}
-	// 			});
-	// 		});
-	// 	}
-	// });
 }
 
 UM.deleteUser = function(userId, callback) {
@@ -90,6 +74,16 @@ UM.deleteUser = function(userId, callback) {
 
 UM.getUserById = function(userId, callback) {
 	User.findOne({id: userId}, function(err, user) {
+		if (user) {
+			callback(null, user);
+		} else {
+			callback('Unable to find user', null);
+		}
+	});
+}
+
+UM.getUserByEmail = function(email, callback) {
+	User.findOne({email: email}, function(err, user) {
 		if (user) {
 			callback(null, user);
 		} else {
